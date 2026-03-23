@@ -1,8 +1,9 @@
 export default function DisclaimerBanner() {
   return (
-    <div className="fixed top-16 left-0 right-0 z-40 bg-secondary/90 border-b border-border py-2 px-4 text-center" style={{ backdropFilter: 'blur(8px)' }}>
-      <p className="text-xs text-text-secondary">
-        <span className="text-warning-yellow">⚖️ Disclaimer:</span> LexAI is an AI tool and does not provide official legal advice. Consult a qualified lawyer for legal decisions.
+    <div className="bg-[#050505]/90 border-b border-[#141414] py-1.5 px-4 text-center" style={{ backdropFilter: 'blur(8px)' }}>
+      <p className="text-[11px] text-[#444]">
+        <span className="text-amber-500/80">⚠️</span>{' '}
+        LexAI is an AI tool and <strong className="text-[#555]">does not</strong> provide official legal advice. Consult a qualified lawyer for important decisions.
       </p>
     </div>
   );

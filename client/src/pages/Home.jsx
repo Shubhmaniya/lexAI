@@ -208,34 +208,46 @@ export default function Home({ activeDocument, onDocumentAnalyzed, language, use
   };
 
   return (
-    <div className="flex flex-col h-full bg-[#18181A] relative">
+    <div className="flex flex-col h-full bg-black relative">
       <div className="flex-1 overflow-y-auto px-4 md:px-0">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center px-4 max-w-2xl mx-auto">
-            <div className="w-16 h-16 bg-accent border border-accent rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(108,99,255,0.3)]">
+            <div className="w-16 h-16 bg-accent border border-accent/60 rounded-2xl flex items-center justify-center mb-6 shadow-xl shadow-accent/20 glow-purple">
               <span className="text-3xl">⚖️</span>
             </div>
-            <h1 className="text-3xl font-semibold mb-3">Hi there! What are we working on?</h1>
-            <p className="text-[#a1a1aa] mb-8">Upload a contract, lease, or any legal document to get an instant safety rating and plain English summary.</p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
+            <h1 className="text-3xl font-bold mb-2 tracking-tight">What are we working on?</h1>
+            <p className="text-[#444] text-sm mb-10 max-w-md">
+              Attach a contract, lease, NDA, or any legal document to get an instant AI-powered analysis — risk rating, key clauses, and plain English summary.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 w-full max-w-md">
               {[
-                { i: '📄', t: 'Upload Employment Contract' },
-                { i: '🏠', t: 'Review a Lease Agreement' },
-                { i: '🤝', t: 'Analyze Non-Disclosure terms' },
-                { i: '📷', t: 'Take photo of a ticket' }
+                { icon: '📄', emoji: '🏢', t: 'Employment Contract', sub: 'Review NDA & non-compete' },
+                { icon: '🏠', emoji: '🔑', t: 'Rental Agreement', sub: 'Check tenant protections' },
+                { icon: '🤝', emoji: '📝', t: 'NDA Analysis', sub: 'Understand restrictions' },
+                { icon: '📷', emoji: '🧾', t: 'Photo of document', sub: 'Capture with your camera' },
               ].map((item, idx) => (
-                <button key={idx} className="bg-[#27272a]/50 hover:bg-[#27272a] border border-[#3f3f46]/50 p-4 rounded-xl text-left transition-all flex items-center gap-3">
-                  <span className="text-xl">{item.i}</span>
-                  <span className="text-sm font-medium text-[#e4e4e7]">{item.t}</span>
+                <button key={idx} className="bg-[#0d0d0d] hover:bg-[#111] border border-[#1a1a1a] hover:border-[#2a2a2a] p-4 rounded-2xl text-left transition-all flex flex-col gap-2 group">
+                  <span className="text-2xl">{item.icon}</span>
+                  <div>
+                    <p className="text-sm font-semibold text-[#e4e4e7] group-hover:text-white transition-colors">{item.t}</p>
+                    <p className="text-xs text-[#444] mt-0.5">{item.sub}</p>
+                  </div>
                 </button>
               ))}
             </div>
+
+            <div className="flex items-center gap-2 mt-10 text-[#333] text-xs">
+              <svg className="w-4 h-4 text-accent/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+              Use the 📎 button below to attach a PDF or image to get started
+            </div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto w-full pt-16 pb-32">
-            <ChatThread 
-              messages={messages} 
+          <div className="max-w-3xl mx-auto w-full pt-16 pb-36">
+            <ChatThread
+              messages={messages}
               processingState={processingState}
               isTyping={isTyping}
               language={language}
@@ -244,10 +256,10 @@ export default function Home({ activeDocument, onDocumentAnalyzed, language, use
         )}
       </div>
 
-      <div className="absolute bottom-0 w-full bg-gradient-to-t from-[#18181A] via-[#18181A] to-transparent pt-10 pb-6">
+      <div className="absolute bottom-0 w-full bg-gradient-to-t from-black via-black/95 to-transparent pt-12 pb-6">
         <div className="max-w-3xl mx-auto px-4 w-full">
-          <ChatInputBar 
-            onSendMessage={handleSendMessage} 
+          <ChatInputBar
+            onSendMessage={handleSendMessage}
             onFileSelect={handleFileSelect}
             isProcessing={!!processingState || isTyping}
           />
