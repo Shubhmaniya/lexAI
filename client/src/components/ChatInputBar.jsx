@@ -1,16 +1,21 @@
 import { useState, useRef } from 'react';
+import { Paperclip, ArrowUp, FileText, Image } from 'lucide-react';
 
 export default function ChatInputBar({ onSendMessage, onFileSelect, isProcessing }) {
   const [text, setText] = useState('');
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const fileInputRef = useRef(null);
+  const imageInputRef = useRef(null);
   const textareaRef = useRef(null);
 
   const handleSend = () => {
-    if (!text.trim() || isProcessing) return;
-    onSendMessage(text.trim());
+    const trimmed = text.trim();
+    if (!trimmed || isProcessing) return;
+    onSendMessage(trimmed);
     setText('');
-    if (textareaRef.current) textareaRef.current.style.height = 'auto';
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -20,125 +25,117 @@ export default function ChatInputBar({ onSendMessage, onFileSelect, isProcessing
     }
   };
 
-  const handleInput = (e) => {
+  const handleTextChange = (e) => {
     setText(e.target.value);
-    // Auto resize
-    e.target.style.height = 'auto';
-    e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px';
-  };
-
-  const attachFile = (accept) => {
-    setMenuOpen(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.accept = accept;
-      fileInputRef.current.click();
+    // Auto-resize textarea
+    const ta = textareaRef.current;
+    if (ta) {
+      ta.style.height = 'auto';
+      ta.style.height = Math.min(ta.scrollHeight, 160) + 'px';
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      onFileSelect(file);
+      setShowAttachMenu(false);
+    }
+    e.target.value = '';
+  };
+
+  const canSend = text.trim().length > 0 && !isProcessing;
+
   return (
     <div className="relative">
-      {/* Attachment popover */}
-      {menuOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-          <div className="absolute bottom-16 left-0 z-50 bg-[#111] border border-[#222] rounded-2xl overflow-hidden shadow-2xl w-52 animate-fade-in">
-            <div className="p-1.5">
-              <button
-                onClick={() => attachFile('.pdf')}
-                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#1a1a1a] text-[#ccc] hover:text-white transition-all text-sm"
-              >
-                <div className="w-8 h-8 rounded-lg bg-blue-900/30 border border-blue-800/40 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="font-medium text-xs">PDF Document</div>
-                  <div className="text-[10px] text-[#555]">Contracts, agreements</div>
-                </div>
-              </button>
-              <button
-                onClick={() => attachFile('image/*')}
-                className="w-full text-left flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[#1a1a1a] text-[#ccc] hover:text-white transition-all text-sm"
-              >
-                <div className="w-8 h-8 rounded-lg bg-purple-900/30 border border-purple-800/40 flex items-center justify-center">
-                  <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="font-medium text-xs">Image / Photo</div>
-                  <div className="text-[10px] text-[#555]">JPG, PNG, WebP</div>
-                </div>
-              </button>
-            </div>
-          </div>
-        </>
+      {/* Attach menu */}
+      {showAttachMenu && (
+        <div className="absolute bottom-full mb-2 left-0 flex flex-col gap-1 bg-[#111] border border-[#1f1f1f] rounded-2xl p-2 shadow-xl z-50 min-w-[180px]">
+          <button
+            onClick={() => { fileInputRef.current?.click(); }}
+            className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#ccc] hover:text-white hover:bg-[#1a1a1a] rounded-xl transition-all"
+          >
+            <FileText className="w-4 h-4 text-orange-400" />
+            Upload PDF
+          </button>
+          <button
+            onClick={() => { imageInputRef.current?.click(); }}
+            className="flex items-center gap-3 px-4 py-2.5 text-sm text-[#ccc] hover:text-white hover:bg-[#1a1a1a] rounded-xl transition-all"
+          >
+            <Image className="w-4 h-4 text-sky-400" />
+            Upload Image
+          </button>
+        </div>
       )}
 
-      {/* Input bar */}
-      <div className={`flex items-end gap-2 bg-[#0f0f0f] border rounded-2xl px-3 py-2.5 shadow-xl transition-all duration-200 ${
-        text ? 'border-[#2a2a2a] shadow-[0_0_0_1px_rgba(108,99,255,0.15),0_4px_24px_rgba(0,0,0,0.6)]' : 'border-[#1a1a1a]'
-      }`}>
+      {/* Hidden file inputs */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,application/pdf"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+
+      {/* Input row */}
+      <div
+        className="flex items-end gap-2 bg-[#0d0d0d] border border-[#1f1f1f] rounded-2xl px-3 py-2 shadow-lg focus-within:border-[#333] transition-all"
+        onClick={() => showAttachMenu && setShowAttachMenu(false)}
+      >
         {/* Attach button */}
         <button
-          onClick={() => setMenuOpen(!menuOpen)}
+          type="button"
           disabled={isProcessing}
-          className={`shrink-0 mb-1 p-2 rounded-xl text-[#444] hover:text-[#888] hover:bg-[#1a1a1a] transition-all disabled:opacity-40 ${menuOpen ? 'text-accent bg-accent/10' : ''}`}
-          title="Attach document"
+          onClick={(e) => { e.stopPropagation(); setShowAttachMenu(v => !v); }}
+          className={`shrink-0 mb-0.5 p-2 rounded-xl transition-all ${
+            showAttachMenu
+              ? 'bg-orange-500/20 text-orange-400'
+              : 'text-[#555] hover:text-white hover:bg-[#1a1a1a]'
+          } disabled:opacity-40`}
+          title="Attach file"
         >
-          <svg className="w-5 h-5 -rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-          </svg>
+          <Paperclip className="w-5 h-5" />
         </button>
-
-        {/* Hidden file input */}
-        <input
-          type="file"
-          className="hidden"
-          ref={fileInputRef}
-          onChange={e => {
-            if (e.target.files?.[0]) {
-              onFileSelect(e.target.files[0]);
-              e.target.value = null;
-            }
-          }}
-        />
 
         {/* Textarea */}
         <textarea
           ref={textareaRef}
           value={text}
-          onChange={handleInput}
+          onChange={handleTextChange}
           onKeyDown={handleKeyDown}
-          placeholder={isProcessing ? "Analyzing your document..." : "Ask a legal question or attach a document…"}
           disabled={isProcessing}
           rows={1}
-          className="flex-1 bg-transparent text-white placeholder:text-[#333] outline-none resize-none text-sm leading-relaxed py-1.5 max-h-40 disabled:opacity-50"
+          placeholder={isProcessing ? 'Processing…' : 'Ask about the document, or attach a file…'}
+          className="flex-1 bg-transparent resize-none text-sm text-[#e4e4e7] placeholder:text-[#444] focus:outline-none py-1.5 max-h-40 leading-relaxed disabled:opacity-50"
+          style={{ minHeight: '36px' }}
         />
 
         {/* Send button */}
         <button
+          type="button"
+          disabled={!canSend}
           onClick={handleSend}
-          disabled={!text.trim() || isProcessing}
-          className={`shrink-0 mb-1 w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
-            text.trim() && !isProcessing
-              ? 'bg-accent text-white hover:bg-accent-hover shadow-lg shadow-accent/20 scale-100'
-              : 'bg-[#1a1a1a] text-[#333] scale-95'
+          className={`shrink-0 mb-0.5 p-2 rounded-xl transition-all ${
+            canSend
+              ? 'bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/25'
+              : 'bg-[#1a1a1a] text-[#333]'
           }`}
+          title="Send"
         >
-          <svg className="w-4 h-4 translate-x-px" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-          </svg>
+          <ArrowUp className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Bottom hint */}
-      {!isProcessing && (
-        <p className="text-center text-[#2a2a2a] text-[11px] mt-2">
-          Press <kbd className="text-[#333] font-mono">Enter</kbd> to send · <kbd className="text-[#333] font-mono">Shift+Enter</kbd> for new line · <kbd className="text-[#333] font-mono">📎</kbd> to attach a document
-        </p>
-      )}
+      <p className="text-center text-[10px] text-[#2a2a2a] mt-2">
+        LexAI may make mistakes. Verify important legal information.
+      </p>
     </div>
   );
 }
