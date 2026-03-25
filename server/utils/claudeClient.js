@@ -17,15 +17,20 @@ const ANALYSIS_SYSTEM_PROMPT = `You are LexAI, an expert legal document analyzer
 }
 Return only valid JSON. No markdown, no backticks, no explanation.`;
 
-const getChatSystemPrompt = (documentText) => {
-  return `You are LexAI, a friendly legal document assistant. The user has uploaded this legal document:
+const getChatSystemPrompt = (documentText, language = 'en') => {
+  const isDocEmpty = !documentText || documentText.trim().length < 50;
+  const docStatus = isDocEmpty 
+    ? "NOTE: The uploaded document appears to be incomplete, unreadable, or missing text. Inform the user about this if relevant, but still try to answer general legal questions based on your knowledge."
+    : `The user has uploaded this legal document:\n\n---\n${documentText}\n---`;
 
----
-${documentText}
----
+  const languageNote = language === 'hi' ? "\n\nIMPORTANT: Respond primarily in Hindi." : "";
 
-Answer the user's questions about this document clearly, simply, and helpfully. Avoid complex legal jargon. Always end every response with:
-'Note: This is AI-generated analysis, not official legal advice. Please consult a qualified lawyer for important legal decisions.'`;
+  return `You are LexAI, a friendly and expert legal document assistant. 
+
+${docStatus}
+
+Answer the user's questions clearly, simply, and helpfully. Avoid complex legal jargon. Always end every response with:
+'Note: This is AI-generated analysis, not official legal advice. Please consult a qualified lawyer for important legal decisions.'${languageNote}`;
 };
 
 async function analyzeDocument(documentText, language = 'en') {
@@ -67,15 +72,12 @@ async function analyzeDocument(documentText, language = 'en') {
 
 async function chatWithDocument(documentText, messages, language = 'en') {
   try {
-    const systemPrompt = getChatSystemPrompt(documentText);
-    const languageNote = language === 'hi'
-      ? '\n\nPlease respond in Hindi.'
-      : '';
+    const systemPrompt = getChatSystemPrompt(documentText, language);
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-5-sonnet-20241022',
       max_tokens: 2048,
-      system: systemPrompt + languageNote,
+      system: systemPrompt,
       messages: messages.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -89,4 +91,29 @@ async function chatWithDocument(documentText, messages, language = 'en') {
   }
 }
 
-module.exports = { analyzeDocument, chatWithDocument };
+// Streaming version for real-time responses
+async function streamChatWithDocument(documentText, messages, language = 'en', onChunk) {
+  const systemPrompt = getChatSystemPrompt(documentText, language);
+
+  const stream = await client.messages.stream({
+    model: 'claude-3-5-sonnet-20241022',
+    max_tokens: 2048,
+    system: systemPrompt,
+    messages: messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }))
+  });
+
+  let fullText = '';
+  for await (const event of stream) {
+    if (event.type === 'content_block_delta' && event.delta?.text) {
+      fullText += event.delta.text;
+      onChunk(event.delta.text);
+    }
+  }
+  return fullText;
+}
+
+module.exports = { analyzeDocument, chatWithDocument, streamChatWithDocument };
+

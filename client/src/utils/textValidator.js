@@ -4,13 +4,13 @@
  */
 export function validateText(text, ocrConfidence) {
   // CHECK 1 - Minimum length
-  if (!text || text.trim().length < 100) {
+  if (!text || text.trim().length < 50) {
     return {
       valid: false,
       error: {
         errorType: 'TEXT_TOO_SHORT',
         error: 'Document Seems Incomplete',
-        message: 'Only a very small amount of text was extracted. The document may be cut off or partially visible.',
+        message: 'The extracted text is too short. Please ensure the document contains enough readable content.',
         tips: [
           'Ensure full document is in frame',
           'Check no pages are missing',

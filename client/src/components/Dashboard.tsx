@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, Home, Shield, Camera } from "lucide-react";
+import { FileText, Shield, Upload, Camera } from "lucide-react";
 import AnalysisCard from "./AnalysisCard";
 import UploadModal from "./UploadModal";
 
@@ -12,12 +12,6 @@ const cards = [
     gradient: "bg-gradient-to-br from-primary to-primary/60",
   },
   {
-    icon: Home,
-    title: "Rental Agreement",
-    description: "Review lease terms, rights, and responsibilities",
-    gradient: "bg-gradient-to-br from-accent to-accent/60",
-  },
-  {
     icon: Shield,
     title: "NDA Analysis",
     description: "Examine confidentiality terms and scope",
@@ -26,8 +20,14 @@ const cards = [
   {
     icon: Camera,
     title: "Document Photo",
-    description: "Upload a photo to extract and analyze text",
+    description: "Upload a photo of any legal document for AI analysis",
     gradient: "bg-gradient-to-br from-amber-500 to-amber-500/60",
+  },
+  {
+    icon: Upload,
+    title: "Quick Document Upload",
+    description: "Upload any legal document — PDF, TXT, or Word — for instant AI feedback",
+    gradient: "bg-gradient-to-br from-accent to-accent/60",
   },
 ];
 
@@ -49,7 +49,7 @@ const Dashboard = ({ activeDocument, onAnalysisSuccess, onNewAnalysis }: Dashboa
   };
 
   if (activeDocument) {
-    return <AnalysisResults document={activeDocument} onBack={onNewAnalysis} />;
+    return <AnalysisResults document={activeDocument} onBack={onNewAnalysis} onAnalysisSuccess={onAnalysisSuccess} />;
   }
 
   return (

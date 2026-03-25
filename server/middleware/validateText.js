@@ -5,6 +5,8 @@
 
 function validateText(req, res, next) {
   const { text, ocrConfidence } = req.body;
+  
+  console.log(`[DEBUG] Validating text. Length: ${text?.length || 0}`);
 
   if (!text) {
     return res.status(400).json({
@@ -13,12 +15,12 @@ function validateText(req, res, next) {
     });
   }
 
-  // CHECK 1 - Minimum length: if text < 100 characters
-  if (text.trim().length < 100) {
+  // CHECK 1 - Minimum length: if text < 50 characters
+  if (text.trim().length < 50) {
     return res.status(400).json({
       error: 'Document Seems Incomplete',
       errorType: 'TEXT_TOO_SHORT',
-      message: 'Only a very small amount of text was extracted. The document may be cut off or partially visible.',
+      message: 'The extracted text is too short. Please ensure the document contains enough readable content.',
       tips: [
         'Ensure full document is in frame',
         'Check no pages are missing',

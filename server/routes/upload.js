@@ -20,15 +20,23 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
       const result = await extractTextFromPDF(file.buffer);
       extractedText = result.text;
       fileType = 'pdf';
-    } else {
-      // For images, the OCR is done client-side with Tesseract.js
-      // Just return the file info, client will handle OCR
+    } else if (file.mimetype === 'text/plain') {
+      // Extract text from plain text file
+      extractedText = file.buffer.toString('utf8');
+      fileType = 'txt';
+    } else if (file.mimetype.startsWith('image/')) {
+      // For images, the OCR is done client-side with Tesseract.js (to save server resources)
       return res.json({
         success: true,
         fileType: 'image',
         fileName: file.originalname,
-        message: 'Image uploaded. OCR will be processed client-side.'
+        message: 'Image detected. OCR will be processed.'
       });
+    } else {
+      // For Word docs and other allowed but non-extractable types, we allow it to pass through
+      // with empty text so the user can still chat or use the fallback flow.
+      extractedText = '';
+      fileType = file.originalname.split('.').pop() || 'unknown';
     }
 
     res.json({

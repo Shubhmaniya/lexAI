@@ -7,18 +7,21 @@ const storage = multer.memoryStorage();
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'application/pdf',
+    'text/plain',
     'image/jpeg',
     'image/jpg',
     'image/png',
     'image/webp',
     'image/heic',
-    'image/heif'
+    'image/heif',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   ];
 
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error(`Unsupported file type: ${file.mimetype}. Allowed: PDF, JPEG, PNG, WebP, HEIC`), false);
+    cb(new Error(`Unsupported file type: ${file.mimetype}. Allowed: PDF, TXT, Word, JPEG, PNG, WebP`), false);
   }
 };
 

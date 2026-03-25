@@ -2,12 +2,12 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = express.Router();
 const authMiddleware = require('../middleware/auth');
-const validateText = require('../middleware/validateText');
 const { analyzeDocument } = require('../utils/claudeClient');
 const Document = require('../models/Document');
 
 // POST /api/analyze - Analyze document text with Claude
-router.post('/', authMiddleware, validateText, async (req, res) => {
+// No text validation - accept any document and let AI handle it
+router.post('/', authMiddleware, async (req, res) => {
   try {
     const { text, fileName, fileType, ocrConfidence, language } = req.body;
 
